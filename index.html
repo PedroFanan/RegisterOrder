@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Compra</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 60%;
+            margin-right: 20px;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            margin-top: 15px;
+            margin-left: -2px;
+            margin-right: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #218838;
+        }
+
+        .products-list-container {
+            width: 40%;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .products-list-container h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .products-list-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .products-list-table th,
+        .products-list-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .products-list-table th {
+            background-color: #f2f2f2;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="form-container">
+        <h2>Formulário de Compra</h2>
+        <form id="purchase-form">
+            <div id="products-container">
+                <div class="form-group product-item">
+                    <label for="product-name">Nome do Produto</label>
+                    <select class="dropdown" name="product-name" required>
+                        <option value="Embalagem 50x40 CINZA">Embalagem 50x40 CINZA</option>
+                        <option value="Embalagem 32x40 CINZA">Embalagem 32x40 CINZA</option>
+                        <option value="Embalagem 26x36 CINZA">Embalagem 26x36 CINZA</option>
+                        <option value="Embalagem 19x25 CINZA">Embalagem 19x25 CINZA</option>
+                        <option value="Embalagem 26x36 CINZA">Embalagem 26x36 CINZA</option>
+                        <option value="Embalagem 19x25 CINZA">Folha Sulfite A4 Chamex 210x297mm - 500fls</option>
+                        <option value="Embalagem 26x36 CINZA">Folha Sulfite A4 Magnun 210x297mm - 500fls</option>
+                        <option value="Embalagem 19x25 CINZA">Fita Adesiva Transparente Und - 45mmx250mt</option>
+                        <option value="Embalagem 19x25 CINZA">Fita Adesiva Transparente Und - 45mmx100mt</option>
+                    </select>
+                    <label for="quantity">Quantidade</label>
+                    <input type="number" name="quantity" required>
+                    <label for="price">Valor Unitário (R$)</label>
+                    <input type="number" name="price" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="addProduct()">Adicionar Produto</button>
+            </div>
+            <div class="form-group">
+                <label for="buyer-name">Nome do Comprador</label>
+                <input type="text" id="buyer-name" name="buyer-name" required>
+            </div>
+            <div class="form-group">
+                <label for="delivery-person">Nome de Quem Entregou</label>
+                <input type="text" id="delivery-person" name="delivery-person" required>
+            </div>
+            <div class="form-group">
+                <label for="address-contact">Endereço com Contato</label>
+                <label id="address-contact" name="address-contact">Rua Eduardo Azzuz, 1284, atrás do posto Palma (16) 99966-6513</label>
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="generatePDF()">Salvar como PDF</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="products-list-container">
+        <h3>Produtos Adicionados</h3>
+        <table id="products-list" class="products-list-table">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Qtd.</th>
+                    <th>Preço (R$)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Produtos adicionados serão listados aqui -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let products = [];
+
+    function addProduct() {
+        const productName = document.querySelector('select[name="product-name"]').value;
+        const quantity = document.querySelector('input[name="quantity"]').value;
+        const price = document.querySelector('input[name="price"]').value;
+
+        // Adicionar o produto ao array de produtos
+        products.push({ productName, quantity, price });
+
+        // Atualizar a tabela de produtos adicionados
+        updateProductsList();
+    }
+
+    function updateProductsList() {
+        const productsList = document.getElementById('products-list').querySelector('tbody');
+        productsList.innerHTML = '';
+
+        products.forEach(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${product.productName}</td>
+                <td>${product.quantity}</td>
+                <td>${product.price}</td>
+            `;
+            productsList.appendChild(row);
+        });
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const autoTable = doc.autoTable;
+
+        const buyerName = document.getElementById('buyer-name').value;
+        const deliveryPerson = document.getElementById('delivery-person').value;
+        const addressContact = document.getElementById('address-contact').textContent;
+
+        // Construa o corpo da tabela usando os produtos adicionados
+        const bodyData = products.map(product => [
+            product.productName,
+            'Código', // Aqui você pode adicionar um código para o produto, se necessário
+            'un',
+            product.quantity,
+            `R$ ${product.price}`,
+            `R$ ${(product.quantity * product.price).toFixed(2)}`
+        ]);
+
+        // Calcular o valor total do pedido
+        const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+
+        // Adicionar uma linha para o valor total do pedido
+        bodyData.push([
+            { content: 'Valor Total do Pedido', colSpan: 5, styles: { halign: 'right' } },
+            `R$ ${totalValue.toFixed(2)}`
+        ]);
+
+        doc.setFontSize(12);
+        doc.text("FRANCA EMBALAGENS LTDA", 105, 10, null, null, "center");
+
+        doc.text("Cliente:", 20, 40);
+        doc.text(buyerName, 50, 40);
+
+        doc.text("Vendedor:", 20, 50);
+        doc.text(deliveryPerson, 50, 50);
+
+        doc.text("Itens do pedido de venda:", 20, 60);
+
+        autoTable.call(doc, {
+            startY: 70,
+            head: [['Descrição do produto/serviço', 'Código', 'Un.', 'Qtd.', 'Valor unitário', 'Valor total']],
+            body: bodyData,
+            theme: 'grid',
+            styles: {
+                halign: 'center',
+                valign: 'middle',
+                fillColor: [200, 200, 200],
+            },
+            headStyles: {
+                fillColor: [150, 150, 150],
+            },
+        });
+
+        doc.text(addressContact, 20, 280);
+        doc.save("pedido.pdf");
+    }
+</script>
+</body>
+</html>
